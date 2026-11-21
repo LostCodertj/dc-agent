@@ -6,14 +6,13 @@ header('X-Frame-Options: DENY');
 header('X-Content-Type-Options: nosniff');
 
 // --- kirish: tajdonat.tj sayt sessiyasi (admin raqami) ---
-$uid = '';
+$uid = ''; $authErr = '';
 try {
+    $pdo0 = dcgw_pdo();                                   // config.php + db.php (pkg_img.php kabi)
     require_once dcgw_api_dir() . '/web_lib.php';
-    $wpdo = null; web_db($wpdo);
-    if ($wpdo instanceof PDO) $GLOBALS['DCGW_PDO'] = $wpdo;
-    $sess = web_session($wpdo);
+    $sess = function_exists('web_session') ? web_session($pdo0) : null;
     if ($sess) $uid = (string)($sess['telegram_id'] ?? '');
-} catch (Throwable $e) { $uid = ''; }
+} catch (Throwable $e) { $uid = ''; $authErr = $e->getMessage(); }
 $isAdm = $uid !== '' && in_array($uid, dcgw_admins(), true);
 $h = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 
@@ -23,7 +22,7 @@ if (!$isAdm) {
        . '<body style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f0f4f9;display:grid;place-items:center;min-height:100vh;margin:0">'
        . '<div style="background:#fff;padding:28px;border-radius:22px;max-width:340px;text-align:center"><h2 style="margin:0 0 8px">🔒 Faqat admin</h2>'
        . '<p style="color:#6b6f88">tajdonat.tj saytiga admin raqami bilan kiring, keyin shu sahifani qayta oching.</p>'
-       . '<a href="https://tajdonat.tj/?login=1" style="display:inline-block;margin-top:10px;background:#6d4aff;color:#fff;padding:12px 20px;border-radius:14px;text-decoration:none;font-weight:700">Kirish</a></div>';
+       . ($authErr !== '' ? '<p style="color:#e5484d;font-size:12px">' . $h($authErr) . '</p>' : ($uid !== '' ? '<p style="color:#9aa0b4;font-size:12px">ID ' . $h($uid) . ' admin ro\'yxatida yo\'q</p>' : '')) . '<a href="https://tajdonat.tj/?login=1" style="display:inline-block;margin-top:10px;background:#6d4aff;color:#fff;padding:12px 20px;border-radius:14px;text-decoration:none;font-weight:700">Kirish</a></div>';
     exit;
 }
 
