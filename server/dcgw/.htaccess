@@ -1,0 +1,6 @@
+<FilesMatch "^(lib|cron|config\.local)\.php$">
+  Require all denied
+</FilesMatch>
+<FilesMatch "\.(sql|md|txt)$">
+  Require all denied
+</FilesMatch>
